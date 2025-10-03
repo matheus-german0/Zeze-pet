@@ -1,0 +1,968 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Pet Serviços Zezé - Sistema</title>
+<style>
+:root{--bg:#fff4f6;--card:#ffffff;--accent:#ff6b81;--muted:#666;--success:#28a745}
+body{font-family:Inter,Segoe UI,Arial;margin:0;background:var(--bg);color:#222}
+header{background:linear-gradient(90deg,var(--accent),#ff9cac);color:white;padding:18px 24px}
+.container{max-width:1000px;margin:22px auto;padding:18px}
+.card{background:var(--card);border-radius:12px;padding:16px;box-shadow:0 6px 18px rgba(0,0,0,0.06);}
+h1,h2,h3,h4{margin:0 0 12px}
+.row{display:flex;gap:12px;flex-wrap:wrap}
+input,select,textarea,button{padding:8px 10px;border-radius:8px;border:1px solid #e6e6e6;font-size:14px}
+label{font-size:13px;color:var(--muted);display:block;margin-bottom:6px}
+.btn{background:var(--accent);color:white;border:0;padding:10px 12px;border-radius:10px;cursor:pointer}
+.btn.ghost{background:transparent;color:var(--accent);border:1px solid rgba(0,0,0,0.06)}
+nav a{color:white;margin-right:12px;text-decoration:none;font-weight:600}
+table{width:100%;border-collapse:collapse}
+th,td{padding:8px;border-bottom:1px solid #f0f0f0;text-align:left}
+.muted{color:var(--muted)}
+.small{font-size:13px}
+.center{display:flex;align-items:center;gap:8px}
+.danger{background:#ffe6e6;color:#a00;border-radius:8px;padding:8px;text-align:center}
+.success{background:#e9fff3;color:var(--success);border-radius:8px;padding:8px;text-align:center}
+.footer-note{margin-top:8px;font-size:12px;color:var(--muted)}
+footer{margin:30px 0;color:var(--muted);text-align:center}
+.hidden{display:none}
+.flex-between{display:flex;justify-content:space-between;align-items:center}
+.stats{display:flex;gap:12px}
+.stat{background:#fff;padding:12px;border-radius:10px;min-width:140px;text-align:center}
+.appt-card{border-bottom:1px solid #eee;padding:6px 0;margin-bottom:6px}
+.canvas-wrap{display:flex;gap:16px;flex-wrap:wrap;margin-top:12px}
+.canvas-card{background:#fff;padding:12px;border-radius:8px;box-shadow:0 3px 8px rgba(0,0,0,0.04);min-width:260px}
+@media(max-width:900px){.canvas-wrap{flex-direction:column}}
+@media(max-width:700px){.row{flex-direction:column}.stats{flex-direction:column}}
+</style>
+</head>
+<body>
+<header>
+  <div class="container flex-between">
+    <div>
+      <h1>Pet Serviços Zezé</h1>
+      <div class="small">Agendamento rápido e gestão de atendimentos</div>
+    </div>
+    <nav>
+      <a href="#/">Início</a>
+      <a href="#/user">Área do Usuário</a>
+      <a href="#/admin">Área do Administrador</a>
+      <a href="#/financeiro">Gestão Financeira</a>
+    </nav>
+  </div>
+</header>
+
+<main class="container">
+  <!-- INDEX / HOME -->
+  <section id="view-home" class="card">
+    <h2>Bem-vindo(a) ao sistema Pet Serviços Zezé</h2>
+    <p class="muted">Escolha sua área:</p>
+    <div class="row">
+      <a class="btn" href="#/user">Entrar como Usuário</a>
+      <a class="btn ghost" href="#/admin">Painel do Administrador</a>
+      <a class="btn ghost" href="#/financeiro">Módulo Financeiro</a>
+    </div>
+  </section>
+
+  <!-- USER VIEW -->
+  <section id="view-user" class="card hidden">
+    <h2>Painel do Cliente</h2>
+    <div id="user-welcome" class="muted small"></div>
+
+    <div id="user-login-box">
+      <label>Login</label>
+      <input id="user-login" placeholder="usuário" autocomplete="off">
+      <label>Senha</label>
+      <input id="user-pass" type="password" placeholder="senha" autocomplete="off">
+      <div style="margin-top:10px">
+        <button class="btn" id="btn-user-login">Entrar</button>
+        <button class="btn ghost" id="user-back">Voltar</button>
+      </div>
+    </div>
+
+    <div id="user-panel" class="hidden">
+      <h3>Verificar CEP</h3>
+      <label>CEP</label>
+      <input id="user-cep" placeholder="somente números, ex: 71234567" maxlength="9">
+      <div style="margin-top:8px" class="row">
+        <button class="btn" id="btn-check-cep">Consultar CEP</button>
+        <button class="btn ghost" id="btn-logout-user">Sair</button>
+      </div>
+
+      <div id="cep-result" class="card hidden" style="margin-top:12px">
+        <div id="cep-info"></div>
+        <div id="cep-attended" style="margin-top:10px"></div>
+
+        <div id="booking-box" class="hidden" style="margin-top:12px">
+          <h4>Agendar Serviço</h4>
+          <div class="row">
+            <div style="flex:1">
+              <label>Data</label>
+              <input type="date" id="booking-date">
+            </div>
+            <div style="flex:1">
+              <label>Horário</label>
+              <select id="booking-time"></select>
+            </div>
+          </div>
+          <label>Serviço</label>
+          <select id="booking-service">
+            <option value="">Selecione</option>
+            <option value="banho">Banho - R$ 50,00</option>
+            <option value="tosa">Tosa - R$ 25,00</option>
+            <option value="banhoetosa">Banho e Tosa - R$ 75,00</option>
+          </select>
+          <div id="service-price" class="muted" style="margin:6px 0"></div>
+          <label>Local (referência)</label>
+          <input id="booking-location" placeholder="Ex: portão A, Bloco B">
+          <label>Nome</label>
+          <input id="booking-name">
+          <label>Telefone</label>
+          <input id="booking-phone" placeholder="11999998888">
+          <div style="margin-top:12px" class="row">
+            <button class="btn" id="btn-confirm-booking">Confirmar Agendamento</button>
+            <button class="btn ghost" id="btn-cancel-booking">Cancelar</button>
+          </div>
+        </div>
+      </div>
+
+      <hr style="margin:12px 0">
+      <h3>Meus Atendimentos</h3>
+      <div id="user-appointments" class="card" style="padding:8px;max-height:300px;overflow:auto"></div>
+    </div>
+  </section>
+
+  <!-- ADMIN VIEW -->
+  <section id="view-admin" class="card hidden">
+    <h2>Painel do Administrador</h2>
+
+    <div id="admin-login-box">
+      <label>Usuário</label>
+      <input id="admin-login" placeholder="usuário do administrador" autocomplete="off">
+      <label>Senha</label>
+      <input id="admin-pass" type="password" placeholder="senha do administrador" autocomplete="off">
+      <div style="margin-top:10px">
+        <button class="btn" id="btn-admin-login">Entrar</button>
+        <button class="btn ghost" id="admin-back">Voltar</button>
+      </div>
+    </div>
+
+    <div id="admin-panel" class="hidden">
+      <div class="flex-between">
+        <div class="stats">
+          <div class="stat"><div class="small">Agendamentos Pendentes</div><div id="stat-pendente">0</div></div>
+          <div class="stat"><div class="small">Atendimentos Agendados</div><div id="stat-concluido">0</div></div>
+          <div class="stat"><div class="small">Usuários Cadastrados</div><div id="stat-users">0</div></div>
+        </div>
+        <div>
+          <button class="btn" id="btn-create-user">Criar Usuário</button>
+          <button class="btn ghost" id="btn-delete-all">Excluir TODOS (usuários+agendamentos)</button>
+          <button class="btn ghost" id="btn-logout-admin">Sair</button>
+        </div>
+      </div>
+
+      <hr style="margin:12px 0">
+      <h3>Gerenciar Usuários</h3>
+      <div id="users-list" style="margin-bottom:12px"></div>
+
+      <hr style="margin:12px 0">
+      <h3>Gerenciar Atendimentos</h3>
+      <table id="appointments-table">
+        <thead>
+          <tr><th>Nome</th><th>Telefone</th><th>Endereço</th><th>Data/Hora</th><th>Status</th><th>Ações</th></tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+
+      <!-- Create/Edit user modal -->
+      <div id="user-modal" class="card hidden" style="margin-top:12px">
+        <h4 id="user-modal-title">Criar Usuário</h4>
+        <label>Nome</label>
+        <input id="modal-name">
+        <label>Telefone</label>
+        <input id="modal-phone">
+        <label>Email</label>
+        <input id="modal-email">
+        <label>Senha</label>
+        <input id="modal-pass" type="password">
+        <div style="margin-top:8px" class="row">
+          <button class="btn" id="modal-save">Salvar</button>
+          <button class="btn ghost" id="modal-cancel">Cancelar</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FINANCEIRO VIEW -->
+  <section id="view-financeiro" class="card hidden">
+    <h2>Módulo Financeiro</h2>
+
+    <div id="finance-login-box">
+      <label>Usuário</label>
+      <input id="finance-login" placeholder="usuário financeiro" autocomplete="off">
+      <label>Senha</label>
+      <input id="finance-pass" type="password" placeholder="senha financeira" autocomplete="off">
+      <div style="margin-top:10px">
+        <button class="btn" id="btn-finance-login">Entrar</button>
+        <button class="btn ghost" id="finance-back">Voltar</button>
+      </div>
+    </div>
+
+    <div id="finance-panel" class="hidden">
+      <div class="flex-between">
+        <div class="stats">
+          <div class="stat"><div class="small">Receita Total</div><div id="stat-receita">R$ 0,00</div></div>
+          <div class="stat"><div class="small">Despesas Totais</div><div id="stat-despesa">R$ 0,00</div></div>
+          <div class="stat"><div class="small">Saldo</div><div id="stat-saldo">R$ 0,00</div></div>
+        </div>
+        <div>
+          <button class="btn" id="btn-add-receita">Adicionar Receita</button>
+          <button class="btn ghost" id="btn-add-despesa">Adicionar Despesa</button>
+          <button class="btn" id="btn-export-csv">Exportar CSV</button>
+          <button class="btn ghost" id="btn-export-pdf">Exportar/Imprimir (PDF)</button>
+          <button class="btn ghost" id="btn-logout-finance">Sair</button>
+        </div>
+      </div>
+
+      <hr style="margin:12px 0">
+      <h3>Movimentações Financeiras</h3>
+      <table id="finance-table">
+        <thead>
+          <tr><th>Tipo</th><th>Descrição</th><th>Valor</th><th>Data</th><th>Ações</th></tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+
+      <div class="canvas-wrap">
+        <div class="canvas-card">
+          <h4 style="margin:0 0 8px">Receita x Despesa (Pizza)</h4>
+          <canvas id="pieChart" width="320" height="200"></canvas>
+        </div>
+        <div class="canvas-card">
+          <h4 style="margin:0 0 8px">Movimentação (Barras)</h4>
+          <canvas id="barChart" width="420" height="200"></canvas>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    Feito para Pet Serviços Zezé — Todos os dados são salvos localmente no seu navegador (localStorage)
+  </footer>
+</main>
+
+<script>
+// ------------------ STORAGE & HELPERS ------------------
+const LS_USERS = 'pz_users';
+const LS_APPTS = 'pz_appointments';
+const LS_CURRENT = 'pz_currentUser';
+const LS_FINANCE = 'pz_financeiro';
+
+let gUserContext = null; // guarda o último usuário logado na área do cliente (para atualizar a lista ao vivo)
+
+function uid(){return 'id_'+Math.random().toString(36).slice(2,9)}
+
+function loadUsers(){
+  const raw = localStorage.getItem(LS_USERS);
+  if(!raw){
+    const defaults = [
+      {id:uid(),username:'admin',name:'Administrador',phone:'',email:'',password:'1234',role:'admin'},
+      {id:uid(),username:'matheus',name:'Matheus',phone:'11999998888',email:'matheus@example.com',password:'1234',role:'user'}
+    ];
+    localStorage.setItem(LS_USERS, JSON.stringify(defaults));
+    return defaults;
+  }
+  return JSON.parse(raw);
+}
+
+function saveUsers(users){localStorage.setItem(LS_USERS,JSON.stringify(users));}
+
+function loadAppts(){
+  const raw = localStorage.getItem(LS_APPTS);
+  if(!raw){localStorage.setItem(LS_APPTS, JSON.stringify([])); return []}
+  return JSON.parse(raw);
+}
+
+function saveAppts(a){
+  localStorage.setItem(LS_APPTS, JSON.stringify(a));
+}
+
+function loadFinance(){
+  const raw = localStorage.getItem(LS_FINANCE);
+  if(!raw){localStorage.setItem(LS_FINANCE, JSON.stringify([])); return []}
+  return JSON.parse(raw);
+}
+
+function saveFinance(f){localStorage.setItem(LS_FINANCE, JSON.stringify(f));}
+
+let users = loadUsers();
+let appts = loadAppts();
+let finances = loadFinance();
+
+// Remove agendamentos passados
+function cleanPastAppts(){
+  const now = new Date();
+  appts = appts.filter(a=>{
+    const d = new Date(a.date+'T'+a.time);
+    return d>=now;
+  });
+  saveAppts(appts);
+}
+cleanPastAppts();
+
+// ------------------ ROUTER ------------------
+function route(){
+  const hash = location.hash || '#/';
+  document.querySelectorAll('main section').forEach(s=>s.classList.add('hidden'));
+  if(hash.startsWith('#/user')){
+    document.getElementById('view-user').classList.remove('hidden');
+    showUserInitial();
+  } else if(hash.startsWith('#/admin')){
+    document.getElementById('view-admin').classList.remove('hidden');
+    showAdminInitial();
+  } else if(hash.startsWith('#/financeiro')){
+    document.getElementById('view-financeiro').classList.remove('hidden');
+    showFinanceInitial();
+  } else {
+    document.getElementById('view-home').classList.remove('hidden');
+  }
+}
+window.addEventListener('hashchange', route);
+route();
+
+// ------------------ USER FLOW ------------------
+document.getElementById('btn-user-login').addEventListener('click', ()=>{
+  const u = document.getElementById('user-login').value.trim();
+  const p = document.getElementById('user-pass').value;
+  const found = users.find(x=>x.username===u && x.password===p);
+  if(!found){alert('Credenciais inválidas'); return}
+  localStorage.setItem(LS_CURRENT, JSON.stringify(found));
+  showUserPanel(found);
+  // limpar campos após login com sucesso
+  document.getElementById('user-login').value='';
+  document.getElementById('user-pass').value='';
+});
+
+document.getElementById('user-back').addEventListener('click', ()=>location.hash='#/');
+
+function showUserInitial(){
+  document.getElementById('user-login-box').classList.remove('hidden');
+  document.getElementById('user-panel').classList.add('hidden');
+  const cur = JSON.parse(localStorage.getItem(LS_CURRENT)||'null');
+  if(cur && cur.role==='user'){
+    showUserPanel(cur);
+  }
+}
+
+function showUserPanel(user){
+  document.getElementById('user-login-box').classList.add('hidden');
+  document.getElementById('user-panel').classList.remove('hidden');
+  document.getElementById('user-welcome').innerText = 'Olá, '+user.name;
+  gUserContext = user;
+  renderUserAppointments(user);
+}
+
+// Logout usuário
+document.getElementById('btn-logout-user').addEventListener('click', ()=>{
+  localStorage.removeItem(LS_CURRENT);
+  gUserContext = null;
+  showUserInitial();
+});
+
+// Renderiza agendamentos do usuário
+function renderUserAppointments(user){
+  const div = document.getElementById('user-appointments'); div.innerHTML='';
+  const userAppts = appts.filter(a=>a.userId===user.id)
+    .sort((a,b)=>new Date(a.date+'T'+a.time)-new Date(b.date+'T'+b.time));
+  if(userAppts.length===0){div.innerHTML='<div class="muted">Nenhum agendamento registrado</div>'; return}
+  userAppts.forEach(a=>{
+    const card = document.createElement('div');
+    card.className='appt-card';
+    let statusText='',statusClass='';
+    if(a.status==='pendente'){statusText='Pendente'; statusClass='danger'}
+    else if(a.status==='agendado'){statusText='Agendado'; statusClass='success'}
+    else if(a.status==='cancelado'){statusText='Cancelado'; statusClass='danger'}
+    card.innerHTML = `
+      <div class="appt-date">${a.date} ${a.time}</div>
+      <div><b>Local:</b> ${a.location}</div>
+      <div><b>Nome:</b> ${a.name} | <b>Telefone:</b> ${a.phone}</div>
+      <div class="${statusClass}" style="margin-top:4px;text-align:center">${statusText}</div>
+    `;
+    div.appendChild(card);
+  });
+}
+
+// ------------------ CONSULTA CEP COM VIACEP ------------------
+document.getElementById('btn-check-cep').addEventListener('click', async ()=>{
+  const cep = document.getElementById('user-cep').value.trim().replace(/\D/g,'');
+  if(!cep || cep.length!==8){alert('Insira um CEP válido (8 números)'); return;}
+  const resDiv = document.getElementById('cep-info');
+  const attDiv = document.getElementById('cep-attended');
+  const bookingBox = document.getElementById('booking-box');
+  try{
+    const r = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
+    if(!r.ok) throw new Error('Erro na consulta do CEP');
+    const data = await r.json();
+    if(data.erro){throw new Error('CEP não encontrado');}
+    resDiv.innerHTML = `<b>Endereço:</b> ${data.logradouro}, ${data.bairro} - ${data.localidade}/${data.uf}`;
+    // Exemplo: só atendemos bairro "Guará II" no DF
+    if(data.bairro && data.bairro.toUpperCase()==='GUARÁ II' && data.uf==='DF'){
+      attDiv.innerHTML='<div class="success">QUE MARAVILHA, REALIZE SEU AGENDAMENTO!</div>';
+      bookingBox.classList.remove('hidden');
+      populateBookingTimes(); // preenche horários ao liberar agendamento
+    } else {
+      attDiv.innerHTML='<div class="danger">QUE PENA, AINDA NÃO CHEGAMOS EM SUA LOCALIDADE.</div>';
+      bookingBox.classList.add('hidden');
+    }
+    document.getElementById('cep-result').classList.remove('hidden');
+  }catch(err){
+    console.error(err);
+    alert('Erro ao consultar o CEP');
+  }
+});
+
+// Gera horários disponíveis (08:00 a 18:00, de hora em hora)
+function populateBookingTimes(){
+  const select = document.getElementById('booking-time');
+  select.innerHTML='';
+  const startHour = 8;
+  const endHour = 18;
+  for(let h=startHour; h<=endHour; h++){
+    const hourStr = String(h).padStart(2,'0')+":00";
+    const opt = document.createElement('option');
+    opt.value = hourStr;
+    opt.textContent = hourStr;
+    select.appendChild(opt);
+  }
+}
+
+// Atualiza horários ao alterar a data (mantido simples)
+document.getElementById('booking-date').addEventListener('change', ()=>{
+  const bookingBox = document.getElementById('booking-box');
+  if(!bookingBox.classList.contains('hidden')){
+    populateBookingTimes();
+  }
+});
+
+// ------------------ PREÇOS E AGENDAMENTO (AJUSTADO) ------------------
+const SERVICE_PRICES = { banhooops:0, banho:50, tosa:25, banhoetosa:75 };
+
+// show selected price
+const serviceSelect = document.getElementById('booking-service');
+if(serviceSelect){
+  serviceSelect.addEventListener('change', ()=>{
+    const val = serviceSelect.value;
+    let price = SERVICE_PRICES[val] || 0;
+    if(price>0){
+      document.getElementById('service-price').innerText = 'Valor: R$ ' + price.toFixed(2).replace('.',',');
+    } else {
+      document.getElementById('service-price').innerText = '';
+    }
+  });
+}
+
+// Confirmar agendamento - agora com seleção de serviço e registro financeiro
+document.getElementById('btn-confirm-booking').addEventListener('click', ()=>{
+  const cur = JSON.parse(localStorage.getItem(LS_CURRENT)||'null');
+  if(!cur){alert('Faça login primeiro'); return;}
+  const date = document.getElementById('booking-date').value;
+  const time = document.getElementById('booking-time').value;
+  const service = document.getElementById('booking-service').value;
+  const location = document.getElementById('booking-location').value.trim();
+  const name = document.getElementById('booking-name').value.trim();
+  const phone = document.getElementById('booking-phone').value.trim();
+  const cep = document.getElementById('user-cep').value.trim().replace(/\D/g,'');
+  if(!date||!time||!service||!location||!name||!phone){alert('Preencha todos os campos e selecione o serviço'); return;}
+  if(!cep){alert('Consulte o CEP antes de agendar'); return;}
+  const attDiv = document.getElementById('cep-attended');
+  if(attDiv.innerText.includes('AINDA NÃO CHEGAMOS')){alert('Não é possível agendar nesta localidade'); return;}
+
+  // map service to readable label and price
+  const svcLabelMap = {banho:'Banho', tosa:'Tosa', banhoetosa:'Banho e Tosa'};
+  const svcLabel = svcLabelMap[service] || service;
+  const price = SERVICE_PRICES[service] || 0;
+
+  // confirmação com valor
+  const confirmed = confirm(`Confirmar agendamento: ${svcLabel} em ${date} ${time} - Valor: R$ ${price.toFixed(2).replace('.',',')}?`);
+  if(!confirmed) return;
+
+  // cria agendamento e registra receita automaticamente
+  const appt = {id:uid(),userId:cur.id,date,time,location,name,phone,status:'pendente',service:svcLabel};
+  appts.push(appt);
+  saveAppts(appts);
+
+  // registra receita na gestão financeira
+  if(price>0){
+    const desc = `Serviço - ${svcLabel} - ${name} (${date} ${time})`;
+    finances.push({id:uid(),tipo:'receita',desc,valor:price,data:new Date().toLocaleDateString()});
+    saveFinance(finances);
+  }
+
+  renderUserAppointments(cur);
+  updateAdminStats();
+  renderAppointmentsTable();
+
+  // atualiza visão financeira se estiver aberta
+  const financeVisible = !document.getElementById('view-financeiro').classList.contains('hidden') &&
+                         !document.getElementById('finance-panel').classList.contains('hidden');
+  if(financeVisible){ renderFinance(); }
+
+  alert('Agendamento registrado com sucesso! O administrador e a gestão financeira foram notificados.');
+});
+
+// Cancelar agendamento (apenas limpa inputs)
+document.getElementById('btn-cancel-booking').addEventListener('click', ()=>{
+  document.getElementById('booking-date').value='';
+  document.getElementById('booking-time').innerHTML='';
+  document.getElementById('booking-service').value='';
+  document.getElementById('service-price').innerText='';
+  document.getElementById('booking-location').value='';
+  document.getElementById('booking-name').value='';
+  document.getElementById('booking-phone').value='';
+});
+
+// ------------------ ADMIN FLOW ------------------
+document.getElementById('btn-admin-login').addEventListener('click', ()=>{
+  const u = document.getElementById('admin-login').value.trim();
+  const p = document.getElementById('admin-pass').value;
+  const found = users.find(x=>x.username===u && x.password===p && x.role==='admin');
+  if(!found){alert('Credenciais inválidas'); return}
+  localStorage.setItem(LS_CURRENT, JSON.stringify(found));
+  showAdminPanel();
+});
+
+document.getElementById('admin-back').addEventListener('click', ()=>location.hash='#/');
+
+document.getElementById('btn-logout-admin').addEventListener('click', ()=>{
+  localStorage.removeItem(LS_CURRENT);
+  showAdminInitial();
+});
+
+function showAdminInitial(){
+  document.getElementById('admin-login-box').classList.remove('hidden');
+  document.getElementById('admin-panel').classList.add('hidden');
+}
+
+function showAdminPanel(){
+  document.getElementById('admin-login-box').classList.add('hidden');
+  document.getElementById('admin-panel').classList.remove('hidden');
+  updateAdminStats();
+  renderUsersList();
+  renderAppointmentsTable();
+}
+
+function updateAdminStats(){
+  document.getElementById('stat-pendente').innerText = appts.filter(a=>a.status==='pendente').length;
+  document.getElementById('stat-concluido').innerText = appts.filter(a=>a.status==='agendado').length;
+  document.getElementById('stat-users').innerText = users.filter(u=>u.role==='user').length;
+}
+
+// Renderização da lista de usuários
+function renderUsersList(){
+  const div = document.getElementById('users-list'); div.innerHTML='';
+  users.filter(u=>u.role==='user').forEach(u=>{
+    const d = document.createElement('div');
+    d.className='card row center';
+    d.innerHTML=`<div style="flex:1">${u.name} | ${u.username} | ${u.phone}</div>
+    <button class="btn ghost" onclick="deleteUser('${u.id}')">Excluir</button>`;
+    div.appendChild(d);
+  });
+}
+
+// Renderização da tabela de agendamentos (com seletor de status)
+function renderAppointmentsTable(){
+  const tbody = document.querySelector('#appointments-table tbody'); tbody.innerHTML='';
+  appts.forEach(a=>{
+    const tr = document.createElement('tr');
+    tr.innerHTML=`
+      <td>${a.name}</td>
+      <td>${a.phone}</td>
+      <td>${a.location}</td>
+      <td>${a.date} ${a.time}</td>
+      <td>
+        <select onchange="updateStatus('${a.id}', this.value)">
+          <option value="pendente" ${a.status==='pendente'?'selected':''}>Pendente</option>
+          <option value="agendado" ${a.status==='agendado'?'selected':''}>Agendado</option>
+          <option value="cancelado" ${a.status==='cancelado'?'selected':''}>Cancelado</option>
+        </select>
+      </td>
+      <td><button class="btn ghost" onclick="deleteAppt('${a.id}')">Excluir</button></td>`;
+    tbody.appendChild(tr);
+  });
+}
+
+// Atualiza status e sincroniza com a visão do usuário
+window.updateStatus = function(id,newStatus){
+  const appt = appts.find(a=>a.id===id);
+  if(appt){
+    const prev = appt.status;
+    appt.status=newStatus;
+    saveAppts(appts);
+    updateAdminStats();
+    renderAppointmentsTable();
+    // Se o usuário estiver logado (nesta ou em outra navegação), mantemos a visão sincronizada
+    if(gUserContext){ renderUserAppointments(gUserContext); }
+
+    // --- integração financeira automática:
+    // Quando marcar como "agendado", perguntamos o valor e registramos uma receita automaticamente.
+    if(prev!=='agendado' && newStatus==='agendado'){
+      // prompt para valor da receita gerada pelo atendimento
+      let raw = prompt(`Registrar receita automática para o agendamento de ${appt.name} em ${appt.date} ${appt.time}.\nInsira o valor (ex: 50.00). Deixe vazio para não registrar.`);
+      if(raw){
+        raw = raw.replace(',','.');
+        const val = parseFloat(raw);
+        if(!isNaN(val) && val>0){
+          const desc = `Serviço - ${appt.name} (${appt.date} ${appt.time})`;
+          finances.push({id:uid(),tipo:'receita',desc,valor:val,data:new Date().toLocaleDateString()});
+          saveFinance(finances);
+          // atualiza visão financeira se estiver aberta
+          const financeVisible = !document.getElementById('view-financeiro').classList.contains('hidden') &&
+                                 !document.getElementById('finance-panel').classList.contains('hidden');
+          if(financeVisible){ renderFinance(); }
+        } else {
+          alert('Valor inválido — receita não registrada.');
+        }
+      }
+    }
+  }
+};
+
+// Excluir usuário (e agendamentos relacionados)
+window.deleteUser = function(id){
+  if(!confirm('Deseja realmente excluir este usuário e seus agendamentos?')) return;
+  users = users.filter(u=>u.id!==id);
+  appts = appts.filter(a=>a.userId!==id);
+  saveUsers(users); saveAppts(appts);
+  updateAdminStats(); renderUsersList(); renderAppointmentsTable();
+  if(gUserContext && gUserContext.id===id){
+    gUserContext=null;
+    const inUser = !document.getElementById('view-user').classList.contains('hidden');
+    if(inUser){ showUserInitial(); }
+  }
+};
+
+// Excluir agendamento
+window.deleteAppt = function(id){
+  if(!confirm('Deseja realmente excluir este agendamento?')) return;
+  appts = appts.filter(a=>a.id!==id);
+  saveAppts(appts);
+  updateAdminStats(); renderAppointmentsTable();
+  if(gUserContext){ renderUserAppointments(gUserContext); }
+};
+
+// Excluir todos
+document.getElementById('btn-delete-all').addEventListener('click', ()=>{
+  if(!confirm('Deseja realmente excluir todos os usuários e agendamentos?')) return;
+  users = users.filter(u=>u.role==='admin'); appts=[]; saveUsers(users); saveAppts(appts);
+  showAdminPanel();
+  if(gUserContext){ renderUserAppointments(gUserContext); }
+});
+
+// Criar usuário
+document.getElementById('btn-create-user').addEventListener('click', ()=>{
+  document.getElementById('user-modal-title').innerText='Criar Usuário';
+  document.getElementById('modal-name').value='';
+  document.getElementById('modal-phone').value='';
+  document.getElementById('modal-email').value='';
+  document.getElementById('modal-pass').value='';
+  document.getElementById('user-modal').classList.remove('hidden');
+});
+document.getElementById('modal-cancel').addEventListener('click', ()=>document.getElementById('user-modal').classList.add('hidden'));
+document.getElementById('modal-save').addEventListener('click', ()=>{
+  const name = document.getElementById('modal-name').value.trim();
+  const phone = document.getElementById('modal-phone').value.trim();
+  const email = document.getElementById('modal-email').value.trim();
+  const pass = document.getElementById('modal-pass').value;
+  if(!name||!pass){alert('Preencha pelo menos Nome e Senha'); return;}
+  const username = name.toLowerCase().replace(/\s/g,'');
+  users.push({id:uid(),username,name,phone,email,password:pass,role:'user'});
+  saveUsers(users);
+  document.getElementById('user-modal').classList.add('hidden');
+  renderUsersList(); updateAdminStats();
+});
+
+// Sincroniza mudanças de agendamentos entre abas (se abertas simultaneamente)
+window.addEventListener('storage', (e)=>{
+  if(e.key===LS_APPTS){
+    appts = loadAppts();
+    updateAdminStats();
+    const adminVisible = !document.getElementById('view-admin').classList.contains('hidden') && 
+                         !document.getElementById('admin-panel').classList.contains('hidden');
+    if(adminVisible){ renderAppointmentsTable(); }
+    if(gUserContext){ renderUserAppointments(gUserContext); }
+  }
+  // sincronização financeira tratada abaixo também
+});
+
+// ------------------ FINANCEIRO FLOW ------------------
+
+// Nota: credenciais do financeiro implementadas no código, mas a recomendação foi removida da UI
+
+document.getElementById('btn-finance-login').addEventListener('click', ()=>{
+  const u = document.getElementById('finance-login').value.trim();
+  const p = document.getElementById('finance-pass').value;
+  if(u==='financeiro' && p==='123456'){
+    localStorage.setItem(LS_CURRENT, JSON.stringify({username:'financeiro',name:'Financeiro',role:'finance'}));
+    showFinancePanel();
+    document.getElementById('finance-login').value='';
+    document.getElementById('finance-pass').value='';
+  } else {
+    alert('Credenciais inválidas');
+  }
+});
+
+document.getElementById('finance-back').addEventListener('click', ()=>location.hash='#/');
+document.getElementById('btn-logout-finance').addEventListener('click', ()=>{
+  localStorage.removeItem(LS_CURRENT);
+  showFinanceInitial();
+});
+
+function showFinanceInitial(){
+  document.getElementById('finance-login-box').classList.remove('hidden');
+  document.getElementById('finance-panel').classList.add('hidden');
+}
+
+function showFinancePanel(){
+  document.getElementById('finance-login-box').classList.add('hidden');
+  document.getElementById('finance-panel').classList.remove('hidden');
+  renderFinance();
+  drawCharts();
+}
+
+function renderFinance(){
+  const tbody = document.querySelector('#finance-table tbody'); tbody.innerHTML='';
+  let receita=0, despesa=0;
+  finances.forEach((f,i)=>{
+    if(f.tipo==='receita') receita+=f.valor; else despesa+=f.valor;
+    const tr = document.createElement('tr');
+    tr.innerHTML=`
+      <td>${f.tipo}</td>
+      <td>${escapeHtml(f.desc||'')}</td>
+      <td>R$ ${f.valor.toFixed(2)}</td>
+      <td>${f.data}</td>
+      <td><button class="btn ghost" onclick="deleteFinance('${f.id}')">Excluir</button></td>`;
+    tbody.appendChild(tr);
+  });
+  const saldo = receita-despesa;
+  document.getElementById('stat-receita').innerText='R$ '+receita.toFixed(2);
+  document.getElementById('stat-despesa').innerText='R$ '+despesa.toFixed(2);
+  document.getElementById('stat-saldo').innerText='R$ '+saldo.toFixed(2);
+  drawCharts();
+}
+
+document.getElementById('btn-add-receita').addEventListener('click', ()=>addFinance('receita'));
+document.getElementById('btn-add-despesa').addEventListener('click', ()=>addFinance('despesa'));
+
+function addFinance(tipo){
+  const desc = prompt('Descrição:');
+  if(desc===null) return; // cancelou
+  let raw = prompt('Valor (ex: 50.00). Use ponto ou vírgula:');
+  if(raw===null) return;
+  raw = raw.replace(',','.');
+  const val = parseFloat(raw);
+  if(!desc||isNaN(val) || val<=0){alert('Preencha corretamente'); return;}
+  const entry = {id:uid(),tipo,desc,valor:val,data:new Date().toLocaleDateString()};
+  finances.push(entry);
+  saveFinance(finances);
+  renderFinance();
+}
+
+// exclusão por id
+window.deleteFinance = function(id){
+  if(!confirm('Excluir lançamento?')) return;
+  finances = finances.filter(f=>f.id!==id);
+  saveFinance(finances);
+  renderFinance();
+};
+
+// Escape simples para textos
+function escapeHtml(unsafe) {
+  return unsafe
+       .replaceAll('&','&amp;')
+       .replaceAll('<','&lt;')
+       .replaceAll('>','&gt;')
+       .replaceAll('"','&quot;')
+       .replaceAll("'",'&#039;');
+}
+
+// ------------------ EXPORT CSV / PDF ------------------
+document.getElementById('btn-export-csv').addEventListener('click', ()=>{
+  if(finances.length===0){ alert('Nenhuma movimentação para exportar'); return; }
+  const header = ['tipo','descricao','valor','data'];
+  const rows = finances.map(f=>[f.tipo, f.desc, f.valor.toFixed(2), f.data]);
+  const csv = [header, ...rows].map(r=>r.map(c=>`"${String(c).replace(/"/g,'""')}"`).join(',')).join('\n');
+  const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `financas_${new Date().toISOString().slice(0,10)}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+});
+
+document.getElementById('btn-export-pdf').addEventListener('click', ()=>{
+  // cria uma janela com um layout simples e chama print()
+  let html = `<html><head><title>Relatório Financeiro</title><style>
+    body{font-family:Arial,Helvetica,sans-serif;padding:20px;color:#222}
+    table{width:100%;border-collapse:collapse}
+    th,td{padding:8px;border:1px solid #ddd;text-align:left}
+    h2{margin:0 0 12px}
+    .tot{margin-top:12px}
+  </style></head><body>`;
+  html += `<h2>Relatório Financeiro - ${new Date().toLocaleDateString()}</h2>`;
+  html += `<table><thead><tr><th>Tipo</th><th>Descrição</th><th>Valor</th><th>Data</th></tr></thead><tbody>`;
+  finances.forEach(f=>{
+    html += `<tr><td>${f.tipo}</td><td>${escapeHtml(f.desc)}</td><td>R$ ${f.valor.toFixed(2)}</td><td>${f.data}</td></tr>`;
+  });
+  html += `</tbody></table>`;
+  const receita = finances.filter(f=>f.tipo==='receita').reduce((s,f)=>s+f.valor,0);
+  const despesa = finances.filter(f=>f.tipo==='despesa').reduce((s,f)=>s+f.valor,0);
+  const saldo = receita-despesa;
+  html += `<div class="tot"><b>Receita:</b> R$ ${receita.toFixed(2)} &nbsp; <b>Despesa:</b> R$ ${despesa.toFixed(2)} &nbsp; <b>Saldo:</b> R$ ${saldo.toFixed(2)}</div>`;
+  html += `</body></html>`;
+  const win = window.open('', '_blank');
+  win.document.write(html);
+  win.document.close();
+  win.focus();
+  // chama print (usuário escolhe salvar em PDF)
+  win.print();
+});
+
+// ------------------ CHARTS (Canvas) ------------------
+// Desenha gráfico pizza e barras simples usando canvas nativo
+function drawCharts(){
+  drawPie();
+  drawBars();
+}
+
+function drawPie(){
+  const canvas = document.getElementById('pieChart');
+  if(!canvas) return;
+  const ctx = canvas.getContext('2d');
+  // limpa
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  const receita = finances.filter(f=>f.tipo==='receita').reduce((s,f)=>s+f.valor,0);
+  const despesa = finances.filter(f=>f.tipo==='despesa').reduce((s,f)=>s+f.valor,0);
+  const total = receita + despesa;
+  // se não houver dados, mostra mensagem
+  if(total===0){
+    ctx.fillStyle = '#666';
+    ctx.font = '14px Arial';
+    ctx.fillText('Sem dados para exibir', 10, 20);
+    return;
+  }
+  const centerX = canvas.width/2;
+  const centerY = canvas.height/2;
+  const radius = Math.min(canvas.width, canvas.height)/3;
+  let start = -Math.PI/2;
+  const slices = [
+    {label:'Receita', value:receita},
+    {label:'Despesa', value:despesa}
+  ];
+  const colors = ['#28a745','#ff6b81'];
+  slices.forEach((s,i)=>{
+    const sliceAngle = (s.value/total)*(Math.PI*2);
+    ctx.beginPath();
+    ctx.moveTo(centerX, centerY);
+    ctx.arc(centerX, centerY, radius, start, start + sliceAngle);
+    ctx.closePath();
+    ctx.fillStyle = colors[i];
+    ctx.fill();
+    start += sliceAngle;
+  });
+  // legend
+  ctx.font = '12px Arial';
+  let ly = 10;
+  slices.forEach((s,i)=>{
+    ctx.fillStyle = colors[i];
+    ctx.fillRect(10, ly, 12, 12);
+    ctx.fillStyle = '#222';
+    ctx.fillText(`${s.label}: R$ ${s.value.toFixed(2)}`, 30, ly+11);
+    ly += 18;
+  });
+}
+
+function drawBars(){
+  const canvas = document.getElementById('barChart');
+  if(!canvas) return;
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  // Agrupa por data (limitado aos últimos 10 lançamentos)
+  if(finances.length===0){
+    ctx.fillStyle = '#666';
+    ctx.font = '14px Arial';
+    ctx.fillText('Sem dados para exibir', 10, 20);
+    return;
+  }
+  // pega últimas 10 entradas para mostrar
+  const last = finances.slice(-10);
+  const labels = last.map(f=>f.data);
+  const values = last.map(f=>f.tipo==='receita'?f.valor:-f.valor); // receitas positivas, despesas negativas
+  // escala
+  const padding = 30;
+  const width = canvas.width;
+  const height = canvas.height;
+  const chartW = width - padding*2;
+  const chartH = height - padding*2;
+  const maxVal = Math.max(...values.map(v=>Math.abs(v)), 1);
+  const barW = chartW / values.length * 0.7;
+  // eixo Y
+  ctx.strokeStyle = '#ddd';
+  ctx.beginPath();
+  ctx.moveTo(padding, padding);
+  ctx.lineTo(padding, height-padding);
+  ctx.lineTo(width-padding, height-padding);
+  ctx.stroke();
+  // barras
+  values.forEach((v,i)=>{
+    const x = padding + (i + 0.15)*(chartW/values.length);
+    const barH = (Math.abs(v)/maxVal) * (chartH*0.45); // metade para positivo outra metade para negativo
+    const midY = padding + chartH/2;
+    if(v>=0){
+      // sobe do meio
+      ctx.fillStyle = '#28a745';
+      ctx.fillRect(x, midY - barH, barW, barH);
+    } else {
+      ctx.fillStyle = '#ff6b81';
+      ctx.fillRect(x, midY, barW, barH);
+    }
+    // rótulo
+    ctx.fillStyle = '#222';
+    ctx.font = '10px Arial';
+    const txt = (last[i].tipo==='receita' ? 'R$ '+last[i].valor.toFixed(0) : '-R$ '+last[i].valor.toFixed(0));
+    ctx.fillText(txt, x, midY + (v<0 ? barH + 12 : -barH - 4));
+    ctx.fillText(labels[i], x, height - 6);
+  });
+  // linha do zero
+  ctx.strokeStyle = '#bbb';
+  ctx.beginPath();
+  ctx.moveTo(padding, padding + chartH/2);
+  ctx.lineTo(width-padding, padding + chartH/2);
+  ctx.stroke();
+}
+
+// ------------------ SINCRONIZAÇÃO ENTRE ABAS (FINANCEIRO) ------------------
+window.addEventListener('storage',(e)=>{
+  if(e.key===LS_FINANCE){
+    finances = loadFinance();
+    const financeVisible = !document.getElementById('view-financeiro').classList.contains('hidden') &&
+                           !document.getElementById('finance-panel').classList.contains('hidden');
+    if(financeVisible){ renderFinance(); }
+  }
+  if(e.key===LS_APPTS){
+    appts = loadAppts();
+    updateAdminStats();
+    const adminVisible = !document.getElementById('view-admin').classList.contains('hidden') && 
+                         !document.getElementById('admin-panel').classList.contains('hidden');
+    if(adminVisible){ renderAppointmentsTable(); }
+    if(gUserContext){ renderUserAppointments(gUserContext); }
+  }
+});
+
+// ------------------ RESTANTE DO CÓDIGO ORIGINAL ------------------
+// (fluxo usuário, admin e CEP foram mantidos como estavam acima)
+
+</script>
+</body>
+</html>
